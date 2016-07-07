@@ -12,8 +12,9 @@ import {
 //     img: "http://p2.zhimg.com/10/7b/107bb4894b46d75a892da6fa80ef504a.jpg"
 // }
 
-export default class SplashComponent extends Component{
+import Home from './Home'
 
+export default class SplashComponent extends Component{
 
   constructor(props){
     super(props)
@@ -32,21 +33,35 @@ export default class SplashComponent extends Component{
 
   getSplashImage(){
 
+    const {navigator} = this.props
+
     var state = this.state;
-    return fetch('http://news-at.zhihu.com/api/4/start-image/720*1184')
+    return fetch('https://news-at.zhihu.com/api/4/start-image/720*1184')
           .then((response) => response.json())
           .then((responseJson) => {
-
-            console.log(responseJson.text);
             state.isLoading = false;
             state.imgurl = responseJson.img
             state.imgText = responseJson.text
             this.setState(state)
+
+            this.timer = setTimeout(() => {
+                if(navigator){
+                    navigator.resetTo({
+                        name: 'Home',
+                        Component: Home
+                    })
+                }
+
+            }, 2000)
             return ;
           })
           .catch((error) => {
             console.error(error);
           });
+  }
+
+  componentWillUnmount() {
+      this.timer && clearTimeout(this.timer)
   }
 
   render(){
@@ -59,9 +74,10 @@ export default class SplashComponent extends Component{
               Loading
             </Text>
           </View>
-        );
+      );
       }
       else{
+
         return(
           <View style={styles.container}>
 
