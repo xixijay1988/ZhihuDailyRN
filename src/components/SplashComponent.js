@@ -22,8 +22,6 @@ export default class SplashComponent extends Component{
       isLoading: true,
       imgurl: '',
       imgText: ''
-
-
     }
   }
 
@@ -51,13 +49,13 @@ export default class SplashComponent extends Component{
                         Component: Home
                     })
                 }
-
             }, 2000)
             return ;
           })
           .catch((error) => {
             console.error(error);
-          });
+          })
+          .done();
   }
 
   componentWillUnmount() {
@@ -74,7 +72,7 @@ export default class SplashComponent extends Component{
               Loading
             </Text>
           </View>
-      );
+        );
       }
       else{
 
@@ -85,11 +83,8 @@ export default class SplashComponent extends Component{
                   <Text style={styles.splashText}>
                     {this.state.imgText}
                   </Text>
-
               </Image>
-
           </View>
-
         );
     }
   }
@@ -114,10 +109,5 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: 'white',
     margin: 20,
-
-
   }
-
-
-
 });
