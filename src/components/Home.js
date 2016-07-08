@@ -1,11 +1,13 @@
 import React,{Component} from 'react';
 import {
-    View,
-    Text,
-    ListView,
-    Image,
-    StyleSheet
+  View,
+  Text,
+  ListView,
+  Image,
+  StyleSheet
 } from 'react-native';
+
+import ViewPager from 'react-native-viewpager';
 
 // URL: http://news-at.zhihu.com/api/4/news/latest
 // 响应实例：
@@ -62,46 +64,52 @@ export default class Home extends Component {
       top_stories: [],
       stories:[],
       dataSource: new ListView.DataSource({
-                    rowHasChanged: (row1, row2) => row1 !== row2,
-                  }),
+        rowHasChanged: (row1, row2) => row1 !== row2,
+      }),
+      pagerSource: new ViewPager.DataSource({
+        pageHasChanged: (p1, p2) => p1 !== p2,
+      })
     }
 
     this.getLatestNews = this.getLatestNews.bind(this);
     this.getNews = this.getNews.bind(this);
+    this.renderHeader = this.renderHeader.bind(this);
+    this.renderPage = this.renderPage.bind(this);
   }
 
   getLatestNews(){
     var state = this.state;
     var stories = state.stories;
     return fetch('https://news-at.zhihu.com/api/4/news/latest')
-            .then((response) => response.json())
-            .then((responseJson) => {
-                state.top_stories = responseJson.top_stories;
-                stories.push({id:0, title:responseJson.date})
-                responseJson.stories.map((story) => stories.push(story))
-                state.dataSource = state.dataSource.cloneWithRows(stories),
-                state.stories = stories
-                state.loaded = true
-                this.setState(state);
-            })
-            .catch((error) => {
-              console.log(error);
-            })
-            .done();
+    .then((response) => response.json())
+    .then((responseJson) => {
+      state.top_stories = responseJson.top_stories;
+      state.pagerSource = state.pagerSource.cloneWithPages(responseJson.top_stories)
+      stories.push({id:0, title:responseJson.date})
+      responseJson.stories.map((story) => stories.push(story))
+      state.dataSource = state.dataSource.cloneWithRows(stories)
+      state.stories = stories
+      state.loaded = true
+      this.setState(state)
+    })
+    .catch((error) => {
+      console.log(error);
+    })
+    .done();
   }
 
   getNews(date){
     var state = this.state;
     return fetch('https://news.at.zhihu.com/api/4/news/before/' + date)
-            .then((response) => response.json())
-            .then((responseJson) => {
-                state.stories = Object.assign({}, state.stories, {id:0, title:responseJson.date})
-                state.stories = Object.assign({}, state.stories, ...responseJson.stories)
-                this.setState(state);
-            })
-            .catch((error) => {
-              console.log(error);
-            })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      state.stories = Object.assign({}, state.stories, {id:0, title:responseJson.date})
+      state.stories = Object.assign({}, state.stories, ...responseJson.stories)
+      this.setState(state);
+    })
+    .catch((error) => {
+      console.log(error);
+    })
 
   }
 
@@ -109,15 +117,36 @@ export default class Home extends Component {
     this.getLatestNews();
   }
 
+  renderPage(story, pageID){
+
+    return (
+      <Image
+        style={{flex:1}}
+        source={{uri: story.image}}
+        />
+    );
+  }
+
+  renderHeader(){
+    return (
+      <View style={styles.headerContainer}>
+        <ViewPager
+          dataSource={this.state.pagerSource}
+          renderPage={this.renderPage}
+          />
+      </View>
+    );
+  }
+
   renderList(story) {
 
     if(story.id == 0){
       return (
-          <View style={styles.cellDate}>
-            <Text style={styles.storyTitle}>
-              {story.title}
-            </Text>
-          </View>
+        <View style={styles.cellDate}>
+          <Text style={styles.storyTitle}>
+            {story.title}
+          </Text>
+        </View>
       );
     }
     else{
@@ -140,6 +169,7 @@ export default class Home extends Component {
         <ListView
           dataSource={this.state.dataSource}
           renderRow={this.renderList}
+          renderHeader={this.renderHeader}
           />
       );
     }
@@ -165,14 +195,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center'
   },
-
   loadingText: {
     textAlign: 'center',
   },
   cellDate:{
-    height: 20
+    height: 30
   },
-
   cellContainer:{
     flex: 1,
     flexDirection: 'row',
@@ -183,7 +211,12 @@ const styles = StyleSheet.create({
   },
   storyTitle:{
     textAlign: 'left'
-  }
+  },
+
+  headerContainer:{
+    width: 500,
+    height: 200
+  },
 
 
 

@@ -8,6 +8,7 @@
   "dependencies": {
     "react": "15.2.0",
     "react-native": "0.29.0",
+    "react-native-viewpager": "^0.2.11",
     "react-timer-mixin": "^0.13.3"
   }
 }
