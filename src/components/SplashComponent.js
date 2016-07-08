@@ -46,7 +46,8 @@ export default class SplashComponent extends Component{
                 if(navigator){
                     navigator.resetTo({
                         name: 'Home',
-                        Component: Home
+                        Component: Home,
+                        message: ''
                     })
                 }
             }, 2000)

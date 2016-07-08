@@ -15,12 +15,13 @@ class AppNav extends Component {
       <Navigator
         initialRoute={{
           name: 'Splash',
-          Component : SplashComponent
+          Component : SplashComponent,
+          message: ''
         }}
         configureScene={ (route, routeStack) => Navigator.SceneConfigs.PushFromRight }
         renderScene={(route, navigator) => {
           let Component = route.Component
-          return <Component {...route.params} navigator={navigator} />
+          return <Component {...route.params} message={route.message} navigator={navigator} />
 
         }}
 

@@ -4,10 +4,12 @@ import {
   Text,
   ListView,
   Image,
-  StyleSheet
+  StyleSheet,
+  TouchableHighlight
 } from 'react-native';
 
 import ViewPager from 'react-native-viewpager';
+import DetailPage from './DetailPage';
 
 // URL: http://news-at.zhihu.com/api/4/news/latest
 // 响应实例：
@@ -75,6 +77,8 @@ export default class Home extends Component {
     this.getNews = this.getNews.bind(this);
     this.renderHeader = this.renderHeader.bind(this);
     this.renderPage = this.renderPage.bind(this);
+    this.renderList = this.renderList.bind(this);
+    this.pressRow = this.pressRow.bind(this);
   }
 
   getLatestNews(){
@@ -138,8 +142,20 @@ export default class Home extends Component {
     );
   }
 
-  renderList(story) {
+  pressRow(id){
 
+    const {navigator} = this.props
+    if(navigator){
+      navigator.push({
+        name: 'Detail',
+        Component: DetailPage,
+        message: id.toString()
+      })
+    }
+
+  }
+
+  renderList(story) {
     if(story.id == 0){
       return (
         <View style={styles.cellDate}>
@@ -151,14 +167,16 @@ export default class Home extends Component {
     }
     else{
       return (
-        <View style={styles.cellContainer}>
-          <Image
-            style={styles.storyImage}
-            source={{uri: story.images[0]}} />
-          <Text style={styles.storyTitle}>
-            {story.title}
-          </Text>
-        </View>
+        <TouchableHighlight onPress={() => {this.pressRow(story.id)}}>
+          <View style={styles.cellContainer}>
+            <Image
+              style={styles.storyImage}
+              source={{uri: story.images[0]}} />
+            <Text style={styles.storyTitle}>
+              {story.title}
+            </Text>
+          </View>
+        </TouchableHighlight>
       );
     }
   }
@@ -210,11 +228,12 @@ const styles = StyleSheet.create({
     height: 60,
   },
   storyTitle:{
-    textAlign: 'left'
+    textAlign: 'left',
+    marginLeft: 10,
+    marginTop: 10,
   },
 
   headerContainer:{
-    width: 500,
     height: 200
   },
 
