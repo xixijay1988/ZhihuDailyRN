@@ -80,20 +80,20 @@ export default class DetailPage extends Component{
   componentDidMount() {
     var _this = this
     if(Platform.OS === 'android'){
-      BackAndroid.addEventListener('hardwareBackPress', function() {
-        _this.goBack();
-        return true;
-      });
+      BackAndroid.addEventListener('hardwareBackPress', this.onBackPress);
     }
     this.getFeedDetial();
   }
 
   componentWillUnmount(){
     if(Platform.OS === 'android'){
-      BackAndroid.removeEventListener('hardwareBackPress', function() {
-        return true;
-      });
+      BackAndroid.removeEventListener('hardwareBackPress', this.onBackPress);
     }
+  }
+
+  onBackPress = () => {
+      this.goBack();
+      return true;
   }
 
 
@@ -104,10 +104,10 @@ export default class DetailPage extends Component{
     {
       var content = this.state.content.css
       var css = content[0]
-      var imageHTML = '<img class="img-place-holder" src="' + this.state.content.image + '"/>'
+      var imageHTML = '<div class="img-place-holder"><img class="img-place-holder2" src="' + this.state.content.image + '"/></div>'
       var HTML = '<!DOCTYPE html><html><head><link rel="stylesheet" type="text/css" href="'
                 + css
-                + '" /></head><body>'
+                + '" /><style type="text/css"> .img-place-holder2{width:100%;height:100%;margin:0;} </style> </head><body>'
                 + this.state.content.body.replace('<div class="img-place-holder"></div>',imageHTML)
                 +  '</body></html>';
       console.log(HTML)

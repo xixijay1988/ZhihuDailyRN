@@ -1,12 +1,15 @@
 import React,{Component} from 'react';
 import {
-  View,
-  Text,
-  ListView,
-  Image,
-  StyleSheet,
-  TouchableHighlight,
-  ActivityIndicator
+    View,
+    Text,
+    ListView,
+    Image,
+    StyleSheet,
+    BackAndroid,
+    Platform,
+    TouchableHighlight,
+    ToastAndroid,
+    ActivityIndicator
 } from 'react-native';
 
 import ViewPager from 'react-native-viewpager';
@@ -60,201 +63,229 @@ import DetailPage from './DetailPage';
 // }
 export default class Home extends Component {
 
-  constructor(props){
-    super(props)
-    this.state = {
-      loaded: false,
-      top_stories: [],
-      stories:[],
-      dataSource: new ListView.DataSource({
-        rowHasChanged: (row1, row2) => row1 !== row2,
-      }),
-      pagerSource: new ViewPager.DataSource({
-        pageHasChanged: (p1, p2) => p1 !== p2,
-      })
+    constructor(props){
+        super(props)
+
+        this.state = {
+            loaded: false,
+            top_stories: [],
+            stories:[],
+            dataSource: new ListView.DataSource({
+                rowHasChanged: (row1, row2) => row1 !== row2,
+            }),
+            pagerSource: new ViewPager.DataSource({
+                pageHasChanged: (p1, p2) => p1 !== p2,
+            })
+        }
+
+        this.navigator = this.props.navigator;
+
+        this.getLatestNews = this.getLatestNews.bind(this);
+        this.getNews = this.getNews.bind(this);
+        this.renderHeader = this.renderHeader.bind(this);
+        this.renderFooter = this.renderFooter.bind(this);
+        this.renderPage = this.renderPage.bind(this);
+        this.renderList = this.renderList.bind(this);
+        this.pressRow = this.pressRow.bind(this);
     }
 
-    this.getLatestNews = this.getLatestNews.bind(this);
-    this.getNews = this.getNews.bind(this);
-    this.renderHeader = this.renderHeader.bind(this);
-    this.renderFooter = this.renderFooter.bind(this);
-    this.renderPage = this.renderPage.bind(this);
-    this.renderList = this.renderList.bind(this);
-    this.pressRow = this.pressRow.bind(this);
-  }
-
-  getLatestNews(){
-    var state = this.state;
-    var stories = state.stories;
-    return fetch('https://news-at.zhihu.com/api/4/news/latest')
-    .then((response) => response.json())
-    .then((responseJson) => {
-      state.top_stories = responseJson.top_stories;
-      state.pagerSource = state.pagerSource.cloneWithPages(responseJson.top_stories)
-      stories.push({id:0, title:responseJson.date})
-      responseJson.stories.map((story) => stories.push(story))
-      state.dataSource = state.dataSource.cloneWithRows(stories)
-      state.stories = stories
-      state.loaded = true
-      this.setState(state)
-    })
-    .catch((error) => {
-      console.log(error);
-    })
-    .done();
-  }
-
-  getNews(date){
-    var state = this.state;
-    return fetch('https://news.at.zhihu.com/api/4/news/before/' + date)
-    .then((response) => response.json())
-    .then((responseJson) => {
-      state.stories = Object.assign({}, state.stories, {id:0, title:responseJson.date})
-      state.stories = Object.assign({}, state.stories, ...responseJson.stories)
-      this.setState(state);
-    })
-    .catch((error) => {
-      console.log(error);
-    })
-
-  }
-
-  componentDidMount() {
-    this.getLatestNews();
-  }
-
-  renderPage(story, pageID){
-
-    return (
-      <Image
-        style={{flex:1}}
-        source={{uri: story.image}}
-        />
-    );
-  }
-
-  renderHeader(){
-    return (
-      <View style={styles.headerContainer}>
-        <ViewPager
-          dataSource={this.state.pagerSource}
-          renderPage={this.renderPage}
-          />
-      </View>
-    );
-  }
-
-  renderFooter(){
-    return (
-        <View>
-          <Text>
-            Loadding
-          </Text>
-        </View>
-    );
-  }
-
-  pressRow(id){
-
-    const {navigator} = this.props
-    if(navigator){
-      navigator.push({
-        name: 'Detail',
-        Component: DetailPage,
-        message: id.toString()
-      })
+    getLatestNews(){
+        var state = this.state;
+        var stories = state.stories;
+        return fetch('https://news-at.zhihu.com/api/4/news/latest')
+        .then((response) => response.json())
+        .then((responseJson) => {
+            state.top_stories = responseJson.top_stories;
+            state.pagerSource = state.pagerSource.cloneWithPages(responseJson.top_stories)
+            stories.push({id:0, title:responseJson.date})
+            responseJson.stories.map((story) => stories.push(story))
+            state.dataSource = state.dataSource.cloneWithRows(stories)
+            state.stories = stories
+            state.loaded = true
+            this.setState(state)
+        })
+        .catch((error) => {
+            console.log(error);
+        })
+        .done();
     }
 
-  }
+    getNews(date){
+        var state = this.state;
+        return fetch('https://news.at.zhihu.com/api/4/news/before/' + date)
+        .then((response) => response.json())
+        .then((responseJson) => {
+            state.stories = Object.assign({}, state.stories, {id:0, title:responseJson.date})
+            state.stories = Object.assign({}, state.stories, ...responseJson.stories)
+            this.setState(state);
+        })
+        .catch((error) => {
+            console.log(error);
+        })
 
-  renderList(story) {
-    if(story.id == 0){
-      return (
-        <View style={styles.cellDate}>
-          <Text style={styles.storyTitle} numberOfLines={2} lineBreakMode="middle">
-            {story.title}
-          </Text>
-        </View>
-      );
     }
-    else{
-      return (
-        <TouchableHighlight onPress={() => {this.pressRow(story.id)}}>
-          <View style={styles.cellContainer}>
+
+    componentDidMount() {
+        if(Platform.OS === 'android'){
+            BackAndroid.addEventListener('hardwareBackPress', this.onBackPress);
+        }
+
+        this.getLatestNews();
+    }
+
+    componentWillUnmount(){
+        if(Platform.OS === 'android'){
+            BackAndroid.removeEventListener('hardwareBackPress', this.onBackPress)
+        }
+    }
+
+    onBackPress = () => {
+        const nav = this.navigator;
+        const routers = nav.getCurrentRoutes();
+        if(routers.length > 1){
+            return true
+        }
+        if (this.lastBackPressed && this.lastBackPressed + 2000 >= Date.now()) {
+            //最近2秒内按过back键，可以退出应用。
+            return false;
+        }
+        this.lastBackPressed = Date.now();
+        ToastAndroid.show('再按一次退出应用',ToastAndroid.SHORT);
+        return true;
+    }
+
+    renderPage(story, pageID){
+
+        return (
             <Image
-              style={styles.storyImage}
-              source={{uri: story.images[0]}} />
-            <Text style={styles.storyTitle} numberOfLines={2} lineBreakMode="middle">
-              {story.title}
+            style={{flex:1}}
+            source={{uri: story.image}}
+            />
+        );
+    }
+
+    renderHeader(){
+        return (
+            <View style={styles.headerContainer}>
+            <ViewPager
+            dataSource={this.state.pagerSource}
+            renderPage={this.renderPage}
+            />
+            </View>
+        );
+    }
+
+    renderFooter(){
+        return (
+            <View>
+            <Text>
+            Loadding
             </Text>
-          </View>
-        </TouchableHighlight>
-      );
+            </View>
+        );
     }
-  }
 
-  render(){
-    if(this.state.loaded){
-      return (
-        <ListView
-          dataSource={this.state.dataSource}
-          renderRow={this.renderList}
-          renderHeader={this.renderHeader}
-          renderFooter={this.renderFooter}
-          />
-      );
-    }
-    else{
+    pressRow(id){
 
-      return (
-        <View style={styles.container}>
-          <ActivityIndicator size="large"/>
-        </View>
-
-      );
+        const {navigator} = this.props
+        if(navigator){
+            navigator.push({
+                name: 'Detail',
+                Component: DetailPage,
+                message: id.toString()
+            })
+        }
 
     }
 
-  }
+    renderList(story) {
+        if(story.id == 0){
+            return (
+                <View style={styles.cellDate}>
+                <Text style={styles.storyTitle} numberOfLines={2} lineBreakMode="middle">
+                {story.title}
+                </Text>
+                </View>
+            );
+        }
+        else{
+            return (
+                <TouchableHighlight onPress={() => {this.pressRow(story.id)}}>
+                <View style={styles.cellContainer}>
+                <Image
+                style={styles.storyImage}
+                source={{uri: story.images[0]}} />
+                <Text style={styles.storyTitle} numberOfLines={2} lineBreakMode="middle">
+                {story.title}
+                </Text>
+                </View>
+                </TouchableHighlight>
+            );
+        }
+    }
+
+    render(){
+        if(this.state.loaded){
+            return (
+                <ListView
+                dataSource={this.state.dataSource}
+                renderRow={this.renderList}
+                renderHeader={this.renderHeader}
+                renderFooter={this.renderFooter}
+                />
+            );
+        }
+        else{
+
+            return (
+                <View style={styles.container}>
+                <ActivityIndicator size="large"/>
+                </View>
+
+            );
+
+        }
+
+    }
 }
 
 const styles = StyleSheet.create({
 
-  container:{
-    flex: 1,
-    justifyContent: 'center'
-  },
-  loadingText: {
-    textAlign: 'center',
-  },
-  cellDate:{
-    height: 30
-  },
-  cellContainer:{
-    flex: 1,
-    flexDirection: 'row',
-    margin: 5,
-    shadowColor: 'darkgrey',
-      shadowOffset: {
-      width: 1,
-      height: 1
-      },
-    shadowOpacity: 0.8,
-    shadowRadius: 1,
-  },
-  storyImage:{
-    width: 60,
-    height: 60,
-  },
-  storyTitle:{
-    flex: 1,
-    textAlign: 'left',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 10,
+    container:{
+        flex: 1,
+        justifyContent: 'center'
+    },
+    loadingText: {
+        textAlign: 'center',
+    },
+    cellDate:{
+        height: 30
+    },
+    cellContainer:{
+        flex: 1,
+        flexDirection: 'row',
+        margin: 5,
+        shadowColor: 'darkgrey',
+        shadowOffset: {
+            width: 1,
+            height: 1
+        },
+        shadowOpacity: 0.8,
+        shadowRadius: 1,
+    },
+    storyImage:{
+        width: 60,
+        height: 60,
+    },
+    storyTitle:{
+        flex: 1,
+        textAlign: 'left',
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginLeft: 10,
 
-  },
-  headerContainer:{
-    height: 200
-  },
+    },
+    headerContainer:{
+        height: 200
+    },
 });
