@@ -5,7 +5,8 @@ import {
   ListView,
   Image,
   StyleSheet,
-  TouchableHighlight
+  TouchableHighlight,
+  ActivityIndicator
 } from 'react-native';
 
 import ViewPager from 'react-native-viewpager';
@@ -195,9 +196,7 @@ export default class Home extends Component {
 
       return (
         <View style={styles.container}>
-          <Text style={styles.loadingText}>
-            Loading
-          </Text>
+          <ActivityIndicator size="large"/>
         </View>
 
       );
@@ -222,6 +221,14 @@ const styles = StyleSheet.create({
   cellContainer:{
     flex: 1,
     flexDirection: 'row',
+    margin: 5,
+    shadowColor: 'darkgrey',
+      shadowOffset: {
+      width: 1,
+      height: 1
+      },
+    shadowOpacity: 0.8,
+    shadowRadius: 1,
   },
   storyImage:{
     width: 60,
@@ -229,14 +236,12 @@ const styles = StyleSheet.create({
   },
   storyTitle:{
     textAlign: 'left',
+    fontSize: 16,
+    fontWeight: 'bold',
     marginLeft: 10,
-    marginTop: 10,
-  },
 
+  },
   headerContainer:{
     height: 200
   },
-
-
-
 });
