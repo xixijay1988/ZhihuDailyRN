@@ -5,7 +5,8 @@ import {
   ListView,
   Image,
   StyleSheet,
-  TouchableHighlight
+  TouchableHighlight,
+  ActivityIndicator
 } from 'react-native';
 
 import ViewPager from 'react-native-viewpager';
@@ -76,6 +77,7 @@ export default class Home extends Component {
     this.getLatestNews = this.getLatestNews.bind(this);
     this.getNews = this.getNews.bind(this);
     this.renderHeader = this.renderHeader.bind(this);
+    this.renderFooter = this.renderFooter.bind(this);
     this.renderPage = this.renderPage.bind(this);
     this.renderList = this.renderList.bind(this);
     this.pressRow = this.pressRow.bind(this);
@@ -142,6 +144,16 @@ export default class Home extends Component {
     );
   }
 
+  renderFooter(){
+    return (
+        <View>
+          <Text>
+            Loadding
+          </Text>
+        </View>
+    );
+  }
+
   pressRow(id){
 
     const {navigator} = this.props
@@ -159,7 +171,7 @@ export default class Home extends Component {
     if(story.id == 0){
       return (
         <View style={styles.cellDate}>
-          <Text style={styles.storyTitle}>
+          <Text style={styles.storyTitle} numberOfLines={2} lineBreakMode="middle">
             {story.title}
           </Text>
         </View>
@@ -172,7 +184,7 @@ export default class Home extends Component {
             <Image
               style={styles.storyImage}
               source={{uri: story.images[0]}} />
-            <Text style={styles.storyTitle}>
+            <Text style={styles.storyTitle} numberOfLines={2} lineBreakMode="middle">
               {story.title}
             </Text>
           </View>
@@ -188,6 +200,7 @@ export default class Home extends Component {
           dataSource={this.state.dataSource}
           renderRow={this.renderList}
           renderHeader={this.renderHeader}
+          renderFooter={this.renderFooter}
           />
       );
     }
@@ -195,9 +208,7 @@ export default class Home extends Component {
 
       return (
         <View style={styles.container}>
-          <Text style={styles.loadingText}>
-            Loading
-          </Text>
+          <ActivityIndicator size="large"/>
         </View>
 
       );
@@ -222,21 +233,28 @@ const styles = StyleSheet.create({
   cellContainer:{
     flex: 1,
     flexDirection: 'row',
+    margin: 5,
+    shadowColor: 'darkgrey',
+      shadowOffset: {
+      width: 1,
+      height: 1
+      },
+    shadowOpacity: 0.8,
+    shadowRadius: 1,
   },
   storyImage:{
     width: 60,
     height: 60,
   },
   storyTitle:{
+    flex: 1,
     textAlign: 'left',
+    fontSize: 16,
+    fontWeight: 'bold',
     marginLeft: 10,
-    marginTop: 10,
-  },
 
+  },
   headerContainer:{
     height: 200
   },
-
-
-
 });

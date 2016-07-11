@@ -4,6 +4,7 @@ import {
   View,
   Image,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 
 //http://news-at.zhihu.com/api/4/start-image/720*1184
@@ -69,9 +70,7 @@ export default class SplashComponent extends Component{
       {
         return (
           <View style={styles.container}>
-            <Text style={styles.loadingText}>
-              Loading
-            </Text>
+            <ActivityIndicator size="large"/>
           </View>
         );
       }

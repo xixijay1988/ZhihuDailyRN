@@ -5,7 +5,9 @@ import {
   StyleSheet,
   Image,
   WebView,
-  ScrollView
+  ActivityIndicator,
+  BackAndroid,
+  Platform
 } from 'react-native';
 
 //http://news-at.zhihu.com/api/4/news/3892357
@@ -46,6 +48,16 @@ export default class DetailPage extends Component{
       loaded: false,
     }
     this.getFeedDetial = this.getFeedDetial.bind(this)
+    this.goBack = this.goBack.bind(this)
+
+
+  }
+
+  goBack(){
+    const {navigator} = this.props;
+    if(navigator){
+      navigator.pop();
+    }
   }
 
   getFeedDetial(){
@@ -66,8 +78,25 @@ export default class DetailPage extends Component{
   }
 
   componentDidMount() {
+    var _this = this
+    if(Platform.OS === 'android'){
+      BackAndroid.addEventListener('hardwareBackPress', function() {
+        _this.goBack();
+        return true;
+      });
+    }
     this.getFeedDetial();
   }
+
+  componentWillUnmount(){
+    if(Platform.OS === 'android'){
+      BackAndroid.removeEventListener('hardwareBackPress', function() {
+        return true;
+      });
+    }
+  }
+
+
 
   render(){
 
@@ -103,10 +132,8 @@ export default class DetailPage extends Component{
     }
     else{
       return (
-        <View>
-          <Text>
-            Loading
-          </Text>
+        <View style={styles.container}>
+          <ActivityIndicator size="large"/>
         </View>
       );
     }
@@ -116,6 +143,7 @@ export default class DetailPage extends Component{
 const styles = StyleSheet.create({
   container:{
     flex:1,
+    justifyContent:'center',
   },
   image:{
     flex:1
