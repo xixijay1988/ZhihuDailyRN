@@ -6,7 +6,8 @@ import {
   Image,
   WebView,
   ActivityIndicator,
-  BackAndroid
+  BackAndroid,
+  Platform
 } from 'react-native';
 
 //http://news-at.zhihu.com/api/4/news/3892357
@@ -78,17 +79,21 @@ export default class DetailPage extends Component{
 
   componentDidMount() {
     var _this = this
-    BackAndroid.addEventListener('hardwareBackPress', function() {
+    if(Platform.OS === 'android'){
+      BackAndroid.addEventListener('hardwareBackPress', function() {
         _this.goBack();
         return true;
-    });
+      });
+    }
     this.getFeedDetial();
   }
 
   componentWillUnmount(){
-    BackAndroid.removeEventListener('hardwareBackPress', function() {
+    if(Platform.OS === 'android'){
+      BackAndroid.removeEventListener('hardwareBackPress', function() {
         return true;
-    });
+      });
+    }
   }
 
 
