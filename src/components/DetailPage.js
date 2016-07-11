@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Image,
   WebView,
+  ScrollView
 } from 'react-native';
 
 //http://news-at.zhihu.com/api/4/news/3892357
@@ -74,17 +75,28 @@ export default class DetailPage extends Component{
     {
       var content = this.state.content.css
       var css = content[0]
-      var HTML = '<link rel="stylesheet" type="text/css" href="' + css + '" />' + this.state.content.body;
+      var imageHTML = '<img class="img-place-holder" src="' + this.state.content.image + '"/>'
+      var HTML = '<!DOCTYPE html><html><head><link rel="stylesheet" type="text/css" href="'
+                + css
+                + '" /></head><body>'
+                + this.state.content.body.replace('<div class="img-place-holder"></div>',imageHTML)
+                +  '</body></html>';
+      console.log(HTML)
       return (
         <View style={styles.container}>
 
           <WebView
-            style={styles.container}
+            style={styles.web}
             source={{html: HTML}}
             scalesPageToFit={true}
+            automaticallyAdjustContentInsets = {true}
             >
+            <Text>
+                dadf
+            </Text>
 
           </WebView>
+
         </View>
 
       );
@@ -106,12 +118,10 @@ const styles = StyleSheet.create({
     flex:1,
   },
   image:{
-    height: 200,
-    marginTop: 0,
+    flex:1
+
   },
   web:{
     flex:1,
-    marginTop: -200,
-    paddingTop: -200
   }
 })
